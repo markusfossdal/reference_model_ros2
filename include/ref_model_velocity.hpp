@@ -24,7 +24,7 @@ class ReferenceModelVelocity : public rclcpp_lifecycle::LifecycleNode {
 
   void publish();
 
-  void callback_sub_data_1(
+  void callback_subscriber(
       const geometry_msgs::msg::TwistStamped::SharedPtr msg);
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -49,12 +49,12 @@ class ReferenceModelVelocity : public rclcpp_lifecycle::LifecycleNode {
   size_t count;
   std::shared_ptr<
       rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::TwistStamped>>
-      pub_;
+      pub_state_, pub_state_dot_, pub_state_ddot_;
   std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::TwistStamped>>
-      sub_data_1_;
+      sub_state_;
   std::shared_ptr<rclcpp::TimerBase> timer_;
 
   geometry_msgs::msg::TwistStamped desired_state;
 
-  ReferenceFilterSiso model_x, model_y  
+  ReferenceFilterSiso model_x, model_y, model_z, model_phi, model_theta, model_psi; 
 };

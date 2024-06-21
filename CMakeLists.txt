@@ -29,11 +29,11 @@ ament_target_dependencies(
 
 target_include_directories(ref_model_velocity PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/lib/reference_model_siso
+  ${CMAKE_CURRENT_SOURCE_DIR}/lib/reference_model_siso/include
   )
 
-target_link_libraries(
-  reference_model_siso
+target_link_libraries(ref_model_velocity
+ reference_model_siso 
 )
 
 target_compile_features(ref_model_velocity PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17

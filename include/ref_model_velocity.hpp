@@ -1,5 +1,6 @@
 #include <chrono>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string>
 #include <thread>
@@ -11,8 +12,8 @@
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "rcutils/logging_macros.h"
-#include "std_msgs/msg/string.hpp"
 #include "reference_model_siso.hpp"
+#include "std_msgs/msg/string.hpp"
 
 using namespace std::chrono_literals;
 
@@ -54,7 +55,20 @@ class ReferenceModelVelocity : public rclcpp_lifecycle::LifecycleNode {
       sub_state_;
   std::shared_ptr<rclcpp::TimerBase> timer_;
 
-  geometry_msgs::msg::TwistStamped desired_state;
+  ReferenceFilterSiso model_x, model_y, model_z, model_phi, model_theta,
+      model_psi;
 
-  ReferenceFilterSiso model_x, model_y, model_z, model_phi, model_theta, model_psi; 
+  int param_pub_freq_hz_, param_qos_buffer_;
+
+  double x_d, y_d, z_d, phi_d, theta_d, psi_d;
+
+  std::string param_pub_state_topic_, param_pub_state_dot_topic_,
+      param_pub_state_ddot_topic_, param_sub_topic_;
+
+  std::map<std::string, double> pmap;
+
+  // ROS2 Parameter callback
+  rcl_interfaces::msg::SetParametersResult paramsCallback(
+      const std::vector<rclcpp::Parameter>& params);
+  OnSetParametersCallbackHandle::SharedPtr params_callback_handle_;
 };

@@ -1,45 +1,131 @@
 #include "ref_model_velocity.hpp"
 
-explicit ReferenceModelVelocity::ReferenceModelVelocity(
+ReferenceModelVelocity::ReferenceModelVelocity(
     const std::string& node_name,
-    bool intra_process_comms = false)
+    bool intra_process_comms)
     : rclcpp_lifecycle::LifecycleNode(
           node_name,
           rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
       count(0) {
 
-  //init desired_state
-  desired_state.header.stamp = this->get_clock()->now();
-  desired_state.twist.linear.x = 0.0;
-  desired_state.twist.linear.y = 0.0;
-  desired_state.twist.linear.z = 0.0;
-  desired_state.twist.angular.x = 0.0;
-  desired_state.twist.angular.y = 0.0;
-  desired_state.twist.angular.z = 0.0;
+  //parameters
+  declare_parameter<int>("param_pub_freq_hz", 100);
+  get_parameter("param_pub_freq_hz", param_pub_freq_hz_);
+
+  //pub topics
+  declare_parameter<std::string>(
+      "param_pub_state_ddot_topic", "ref_state_ddot");
+  get_parameter("param_pub_state_ddot_topic", param_pub_state_ddot_topic_);
+
+  declare_parameter<std::string>("param_pub_state_dot_topic", "ref_state_dot");
+  get_parameter("param_pub_state_dot_topic", param_pub_state_dot_topic_);
+
+  declare_parameter<std::string>("param_pub_state_topic", "ref_state");
+  get_parameter("ref_state", param_pub_state_topic_);
+
+  //sub topics
+  declare_parameter<std::string>("param_sub_topic", "desired_state");
+  get_parameter("param_sub_topic", param_sub_topic_);
+
+  //qos buffer
+  declare_parameter<int>("param_qos_buffer", 10);
+  get_parameter("param_qos_buffer", param_qos_buffer_);
+
+  pmap["rt_omega_n_x"] = 0.0;
+  pmap["rt_zeta_x"] = 0.0;
+  pmap["rt_sat_state_ddot_lower_x"] = 0.0;
+  pmap["rt_sat_state_ddot_upper_x"] = 0.0;
+  pmap["rt_sat_state_dot_lower_x"] = 0.0;
+  pmap["rt_sat_state_dot_upper_x"] = 0.0;
+  pmap["rt_dt_x"] = 0.0;
+
+  pmap["rt_omega_n_y"] = 0.0;
+  pmap["rt_zeta_y"] = 0.0;
+  pmap["rt_sat_state_ddot_lower_y"] = 0.0;
+  pmap["rt_sat_state_ddot_upper_y"] = 0.0;
+  pmap["rt_sat_state_dot_lower_y"] = 0.0;
+  pmap["rt_sat_state_dot_upper_y"] = 0.0;
+  pmap["rt_dt_y"] = 0.0;
+
+  pmap["rt_omega_n_z"] = 0.0;
+  pmap["rt_zeta_z"] = 0.0;
+  pmap["rt_sat_state_ddot_lower_z"] = 0.0;
+  pmap["rt_sat_state_ddot_upper_z"] = 0.0;
+  pmap["rt_sat_state_dot_lower_z"] = 0.0;
+  pmap["rt_sat_state_dot_upper_z"] = 0.0;
+  pmap["rt_dt_z"] = 0.0;
+
+  pmap["rt_omega_n_phi"] = 0.0;
+  pmap["rt_zeta_phi"] = 0.0;
+  pmap["rt_sat_state_ddot_lower_phi"] = 0.0;
+  pmap["rt_sat_state_ddot_upper_phi"] = 0.0;
+  pmap["rt_sat_state_dot_lower_phi"] = 0.0;
+  pmap["rt_sat_state_dot_upper_phi"] = 0.0;
+  pmap["rt_dt_phi"] = 0.0;
+
+  pmap["rt_omega_n_theta"] = 0.0;
+  pmap["rt_zeta_theta"] = 0.0;
+  pmap["rt_sat_state_ddot_lower_theta"] = 0.0;
+  pmap["rt_sat_state_ddot_upper_theta"] = 0.0;
+  pmap["rt_sat_state_dot_lower_theta"] = 0.0;
+  pmap["rt_sat_state_dot_upper_theta"] = 0.0;
+  pmap["rt_dt_theta"] = 0.0;
+
+  pmap["rt_omega_n_psi"] = 0.0;
+  pmap["rt_zeta_psi"] = 0.0;
+  pmap["rt_sat_state_ddot_lower_psi"] = 0.0;
+  pmap["rt_sat_state_ddot_upper_psi"] = 0.0;
+  pmap["rt_sat_state_dot_lower_psi"] = 0.0;
+  pmap["rt_sat_state_dot_upper_psi"] = 0.0;
+  pmap["rt_dt_psi"] = 0.0;
+
+  for (auto& pair : pmap) {
+    declare_parameter<double>(pair.first, pair.second);
+    get_parameter(pair.first, pair.second);
+  }
 }
 
 void ReferenceModelVelocity::publish() {
 
-  //compute reference signal
-  auto x_d = desired_state.twist.linear.x;
-  auto y_d = desired_state.twist.linear.y;
-  auto z_d = desired_state.twist.linear.z;
-  auto phi_d = desired_state.twist.angular.x;
-  auto theta_d = desired_state.twist.angular.y;
-  auto psi_d = desired_state.twist.angular.z;
-
-  model_x.model_order_2(x_d, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-  model_y.model_order_2(x_d, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-  model_z.model_order_2(x_d, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-  model_phi.model_order_2(x_d, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-  model_theta.model_order_2(x_d, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-  model_psi.model_order_2(x_d, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+  model_x.model_order_2(
+      x_d, pmap["rt_omega_n_x"], pmap["rt_zeta_x"],
+      pmap["rt_sat_state_ddot_lower_x"], pmap["rt_sat_state_ddot_upper_x"],
+      pmap["rt_sat_state_dot_lower_x"], pmap["rt_sat_state_dot_upper_x"],
+      pmap["rt_dt_x"]);
+  model_y.model_order_2(
+      y_d, pmap["rt_omega_n_y"], pmap["rt_zeta_y"],
+      pmap["rt_sat_state_ddot_lower_y"], pmap["rt_sat_state_ddot_upper_y"],
+      pmap["rt_sat_state_dot_lower_y"], pmap["rt_sat_state_dot_upper_y"],
+      pmap["rt_dt_y"]);
+  model_z.model_order_2(
+      z_d, pmap["rt_omega_n_z"], pmap["rt_zeta_z"],
+      pmap["rt_sat_state_ddot_lower_z"], pmap["rt_sat_state_ddot_upper_z"],
+      pmap["rt_sat_state_dot_lower_z"], pmap["rt_sat_state_dot_upper_z"],
+      pmap["rt_dt_z"]);
+  model_phi.model_order_2(
+      phi_d, pmap["rt_omega_n_phi"], pmap["rt_zeta_phi"],
+      pmap["rt_sat_state_ddot_lower_phi"], pmap["rt_sat_state_ddot_upper_phi"],
+      pmap["rt_sat_state_dot_lower_phi"], pmap["rt_sat_state_dot_upper_phi"],
+      pmap["rt_dt_phi"]);
+  model_theta.model_order_2(
+      theta_d, pmap["rt_omega_n_theta"], pmap["rt_zeta_theta"],
+      pmap["rt_sat_state_ddot_lower_theta"],
+      pmap["rt_sat_state_ddot_upper_theta"],
+      pmap["rt_sat_state_dot_lower_theta"],
+      pmap["rt_sat_state_dot_upper_theta"], pmap["rt_dt_theta"]);
+  model_psi.model_order_2(
+      psi_d, pmap["rt_omega_n_psi"], pmap["rt_zeta_psi"],
+      pmap["rt_sat_state_ddot_lower_psi"], pmap["rt_sat_state_ddot_upper_psi"],
+      pmap["rt_sat_state_dot_lower_psi"], pmap["rt_sat_state_dot_upper_psi"],
+      pmap["rt_dt_psi"]);
 
   //fetch time stamp
   auto current_time = this->get_clock()->now();
 
-  //state_ddot
+  //declare msg
   geometry_msgs::msg::TwistStamped msg;
+
+  //publish state_ddot
   msg.header.stamp = current_time;
   msg.twist.linear.x = model_x.get_state_ddot();
   msg.twist.linear.y = model_y.get_state_ddot();
@@ -50,8 +136,10 @@ void ReferenceModelVelocity::publish() {
 
   pub_state_ddot_->publish(msg);
 
-  //state_dot
-  geometry_msgs::msg::TwistStamped msg;
+  //reinitialize/clear msg
+  msg = geometry_msgs::msg::TwistStamped();
+
+  //publish state_dot
   msg.header.stamp = current_time;
   msg.twist.linear.x = model_x.get_state_dot();
   msg.twist.linear.y = model_y.get_state_dot();
@@ -62,8 +150,10 @@ void ReferenceModelVelocity::publish() {
 
   pub_state_dot_->publish(msg);
 
-  //state
-  geometry_msgs::msg::TwistStamped msg;
+  //reinitialize/clear msg
+  msg = geometry_msgs::msg::TwistStamped();
+
+  //publish state
   msg.header.stamp = current_time;
   msg.twist.linear.x = model_x.get_state();
   msg.twist.linear.y = model_y.get_state();
@@ -73,46 +163,71 @@ void ReferenceModelVelocity::publish() {
   msg.twist.angular.z = model_psi.get_state();
 
   pub_state_->publish(msg);
+
+  //reinitialize/clear msg
+  msg = geometry_msgs::msg::TwistStamped();
 }
 
 void ReferenceModelVelocity::callback_subscriber(
     const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
-  //fetch time stamp
-  auto current_time = this->get_clock()->now();
-
-  //populate desired state
-  desired_state.header.stamp = msg->header.stamp;
-  desired_state.twist.linear.x = msg->twist.linear.x;
-  desired_state.twist.linear.y = msg->twist.linear.y;
-  desired_state.twist.linear.z = msg->twist.linear.z;
-  desired_state.twist.angular.x = msg->twist.angular.x;
-  desired_state.twist.angular.y = msg->twist.angular.y;
-  desired_state.twist.angular.z = msg->twist.angular.z;
+  //populate desired states
+  x_d = msg->twist.linear.x;
+  y_d = msg->twist.linear.y;
+  z_d = msg->twist.linear.z;
+  phi_d = msg->twist.angular.x;
+  theta_d = msg->twist.angular.y;
+  psi_d = msg->twist.angular.z;
 }
 
+//parameter callback for parameters in pmap
+//checks all parameters against the parameters in pmap, and updates the parameter value.
+rcl_interfaces::msg::SetParametersResult ReferenceModelVelocity::paramsCallback(
+    const std::vector<rclcpp::Parameter>& params) {
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = false;
+  result.reason = "Not succesful!";
+  for (const auto& param : params) {
+    for (auto& pair : pmap) {
+      if (param.get_name() == pair.first) {
+        pair.second = param.as_double();
+        result.reason = "Successful!";
+        result.successful = true;
+      } else {
 
-//parameter callbacks
-
+        result.successful = false;
+        result.reason = "Not succesful!";
+      }
+    }
+  }
+  return result;
+};
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 ReferenceModelVelocity::on_configure(const rclcpp_lifecycle::State&) {
-  pub_state_ddot_ = this->create_publisher<geometry_msgs::msg::TwistStamped>(
-      "ref_state_ddot", 10);
+  pub_state_ddot_ = create_publisher<geometry_msgs::msg::TwistStamped>(
+      "ref_state_ddot", param_qos_buffer_);
 
-  pub_state_dot_ = this->create_publisher<geometry_msgs::msg::TwistStamped>(
-      "ref_state_dot", 10);
+  pub_state_dot_ = create_publisher<geometry_msgs::msg::TwistStamped>(
+      "ref_state_dot", param_qos_buffer_);
 
-  pub_state_ =
-      this->create_publisher<geometry_msgs::msg::TwistStamped>("ref_state", 10);
+  pub_state_ = create_publisher<geometry_msgs::msg::TwistStamped>(
+      "ref_state", param_qos_buffer_);
 
-  sub_state_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
-      "desired_state", 10,
+  sub_state_ = create_subscription<geometry_msgs::msg::TwistStamped>(
+      "desired_state", param_qos_buffer_,
       std::bind(
           &ReferenceModelVelocity::callback_subscriber, this,
           std::placeholders::_1));
 
-  timer_ = this->create_wall_timer(
-      1s, std::bind(&ReferenceModelVelocity::publish, this));
+  //hz to period in ns
+  double freq_hz = param_pub_freq_hz_;
+  double period_sec = 1.0 / freq_hz;
+  std::chrono::nanoseconds period_ns(static_cast<long long>(period_sec * 1e9));
+  timer_ = create_wall_timer(
+      period_ns, std::bind(&ReferenceModelVelocity::publish, this));
+
+  params_callback_handle_ = add_on_set_parameters_callback(std::bind(
+      &ReferenceModelVelocity::paramsCallback, this, std::placeholders::_1));
 
   RCLCPP_INFO(get_logger(), "on_configure() is called.");
 

@@ -1,6 +1,6 @@
 reference_model_ros2:
   param_pub_freq_hz: 100
-  param_pub_state_ddot_topic: "ref_state_ddot""
+  param_pub_state_ddot_topic: "ref_state_ddot"
   param_pub_state_dot_topic: "ref_state_dot"
   param_pub_state_topic: "ref_state"
   param_qos_buffer: 10
@@ -44,7 +44,7 @@ reference_model_ros2:
   rt_zeta_phi: 1.0
   rt_zeta_psi: 1.0
   rt_zeta_theta: 1.0
-  rt_zeta_x: 1.5
+  rt_zeta_x: 1.0
   rt_zeta_y: 1.0
   rt_zeta_z: 1.0
   use_sim_time: false

@@ -79,5 +79,4 @@ def generate_launch_description():
         reference_model,
         configure_event,
         activate_event
-    ]
-)
+    ])

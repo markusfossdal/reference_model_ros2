@@ -88,33 +88,33 @@ ReferenceModelPosition::ReferenceModelPosition(
 
 void ReferenceModelPosition::publish() {
 
-  model_x.model_order_2(
+  model_x.model_order_3(
       x_d, pmap["rt_omega_n_x"], pmap["rt_zeta_x"],
       pmap["rt_sat_state_ddot_lower_x"], pmap["rt_sat_state_ddot_upper_x"],
       pmap["rt_sat_state_dot_lower_x"], pmap["rt_sat_state_dot_upper_x"],
       pmap["rt_dt_x"]);
-  model_y.model_order_2(
+  model_y.model_order_3(
       y_d, pmap["rt_omega_n_y"], pmap["rt_zeta_y"],
       pmap["rt_sat_state_ddot_lower_y"], pmap["rt_sat_state_ddot_upper_y"],
       pmap["rt_sat_state_dot_lower_y"], pmap["rt_sat_state_dot_upper_y"],
       pmap["rt_dt_y"]);
-  model_z.model_order_2(
+  model_z.model_order_3(
       z_d, pmap["rt_omega_n_z"], pmap["rt_zeta_z"],
       pmap["rt_sat_state_ddot_lower_z"], pmap["rt_sat_state_ddot_upper_z"],
       pmap["rt_sat_state_dot_lower_z"], pmap["rt_sat_state_dot_upper_z"],
       pmap["rt_dt_z"]);
-  model_phi.model_order_2(
+  model_phi.model_order_3(
       phi_d, pmap["rt_omega_n_phi"], pmap["rt_zeta_phi"],
       pmap["rt_sat_state_ddot_lower_phi"], pmap["rt_sat_state_ddot_upper_phi"],
       pmap["rt_sat_state_dot_lower_phi"], pmap["rt_sat_state_dot_upper_phi"],
       pmap["rt_dt_phi"]);
-  model_theta.model_order_2(
+  model_theta.model_order_3(
       theta_d, pmap["rt_omega_n_theta"], pmap["rt_zeta_theta"],
       pmap["rt_sat_state_ddot_lower_theta"],
       pmap["rt_sat_state_ddot_upper_theta"],
       pmap["rt_sat_state_dot_lower_theta"],
       pmap["rt_sat_state_dot_upper_theta"], pmap["rt_dt_theta"]);
-  model_psi.model_order_2(
+  model_psi.model_order_3(
       psi_d, pmap["rt_omega_n_psi"], pmap["rt_zeta_psi"],
       pmap["rt_sat_state_ddot_lower_psi"], pmap["rt_sat_state_ddot_upper_psi"],
       pmap["rt_sat_state_dot_lower_psi"], pmap["rt_sat_state_dot_upper_psi"],

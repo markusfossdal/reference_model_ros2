@@ -1,6 +1,6 @@
-#include "ref_model_velocity.hpp"
+#include "ref_model_position.hpp"
 
-ReferenceModelVelocity::ReferenceModelVelocity(
+ReferenceModelPosition::ReferenceModelPosition(
     const std::string& node_name,
     bool intra_process_comms)
     : rclcpp_lifecycle::LifecycleNode(
@@ -86,35 +86,35 @@ ReferenceModelVelocity::ReferenceModelVelocity(
   }
 }
 
-void ReferenceModelVelocity::publish() {
+void ReferenceModelPosition::publish() {
 
-  model_x.model_order_3(
+  model_x.model_order_2(
       x_d, pmap["rt_omega_n_x"], pmap["rt_zeta_x"],
       pmap["rt_sat_state_ddot_lower_x"], pmap["rt_sat_state_ddot_upper_x"],
       pmap["rt_sat_state_dot_lower_x"], pmap["rt_sat_state_dot_upper_x"],
       pmap["rt_dt_x"]);
-  model_y.model_order_3(
+  model_y.model_order_2(
       y_d, pmap["rt_omega_n_y"], pmap["rt_zeta_y"],
       pmap["rt_sat_state_ddot_lower_y"], pmap["rt_sat_state_ddot_upper_y"],
       pmap["rt_sat_state_dot_lower_y"], pmap["rt_sat_state_dot_upper_y"],
       pmap["rt_dt_y"]);
-  model_z.model_order_3(
+  model_z.model_order_2(
       z_d, pmap["rt_omega_n_z"], pmap["rt_zeta_z"],
       pmap["rt_sat_state_ddot_lower_z"], pmap["rt_sat_state_ddot_upper_z"],
       pmap["rt_sat_state_dot_lower_z"], pmap["rt_sat_state_dot_upper_z"],
       pmap["rt_dt_z"]);
-  model_phi.model_order_3(
+  model_phi.model_order_2(
       phi_d, pmap["rt_omega_n_phi"], pmap["rt_zeta_phi"],
       pmap["rt_sat_state_ddot_lower_phi"], pmap["rt_sat_state_ddot_upper_phi"],
       pmap["rt_sat_state_dot_lower_phi"], pmap["rt_sat_state_dot_upper_phi"],
       pmap["rt_dt_phi"]);
-  model_theta.model_order_3(
+  model_theta.model_order_2(
       theta_d, pmap["rt_omega_n_theta"], pmap["rt_zeta_theta"],
       pmap["rt_sat_state_ddot_lower_theta"],
       pmap["rt_sat_state_ddot_upper_theta"],
       pmap["rt_sat_state_dot_lower_theta"],
       pmap["rt_sat_state_dot_upper_theta"], pmap["rt_dt_theta"]);
-  model_psi.model_order_3(
+  model_psi.model_order_2(
       psi_d, pmap["rt_omega_n_psi"], pmap["rt_zeta_psi"],
       pmap["rt_sat_state_ddot_lower_psi"], pmap["rt_sat_state_ddot_upper_psi"],
       pmap["rt_sat_state_dot_lower_psi"], pmap["rt_sat_state_dot_upper_psi"],
@@ -169,7 +169,7 @@ void ReferenceModelVelocity::publish() {
   msg = geometry_msgs::msg::TwistStamped();
 }
 
-void ReferenceModelVelocity::callback_subscriber(
+void ReferenceModelPosition::callback_subscriber(
     const geometry_msgs::msg::TwistStamped::SharedPtr msg) {
   //populate desired states
   x_d = msg->twist.linear.x;
@@ -182,7 +182,7 @@ void ReferenceModelVelocity::callback_subscriber(
 
 //parameter callback for parameters in pmap
 //checks all parameters against the parameters in pmap, and updates the parameter value.
-rcl_interfaces::msg::SetParametersResult ReferenceModelVelocity::paramsCallback(
+rcl_interfaces::msg::SetParametersResult ReferenceModelPosition::paramsCallback(
     const std::vector<rclcpp::Parameter>& params) {
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = false;
@@ -204,7 +204,7 @@ rcl_interfaces::msg::SetParametersResult ReferenceModelVelocity::paramsCallback(
 };
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-ReferenceModelVelocity::on_configure(const rclcpp_lifecycle::State&) {
+ReferenceModelPosition::on_configure(const rclcpp_lifecycle::State&) {
   pub_state_ddot_ = create_publisher<geometry_msgs::msg::TwistStamped>(
       "ref_state_ddot", param_qos_buffer_);
 
@@ -217,7 +217,7 @@ ReferenceModelVelocity::on_configure(const rclcpp_lifecycle::State&) {
   sub_state_ = create_subscription<geometry_msgs::msg::TwistStamped>(
       "desired_state", param_qos_buffer_,
       std::bind(
-          &ReferenceModelVelocity::callback_subscriber, this,
+          &ReferenceModelPosition::callback_subscriber, this,
           std::placeholders::_1));
 
   //hz to period in ns
@@ -225,10 +225,10 @@ ReferenceModelVelocity::on_configure(const rclcpp_lifecycle::State&) {
   double period_sec = 1.0 / freq_hz;
   std::chrono::nanoseconds period_ns(static_cast<long long>(period_sec * 1e9));
   timer_ = create_wall_timer(
-      period_ns, std::bind(&ReferenceModelVelocity::publish, this));
+      period_ns, std::bind(&ReferenceModelPosition::publish, this));
 
   params_callback_handle_ = add_on_set_parameters_callback(std::bind(
-      &ReferenceModelVelocity::paramsCallback, this, std::placeholders::_1));
+      &ReferenceModelPosition::paramsCallback, this, std::placeholders::_1));
   RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::
@@ -236,7 +236,7 @@ ReferenceModelVelocity::on_configure(const rclcpp_lifecycle::State&) {
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-ReferenceModelVelocity::on_activate(const rclcpp_lifecycle::State&) {
+ReferenceModelPosition::on_activate(const rclcpp_lifecycle::State&) {
   pub_state_ddot_->on_activate();
   pub_state_dot_->on_activate();
   pub_state_->on_activate();
@@ -248,7 +248,7 @@ ReferenceModelVelocity::on_activate(const rclcpp_lifecycle::State&) {
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-ReferenceModelVelocity::on_deactivate(const rclcpp_lifecycle::State&) {
+ReferenceModelPosition::on_deactivate(const rclcpp_lifecycle::State&) {
 
   pub_state_ddot_->on_deactivate();
   pub_state_dot_->on_deactivate();
@@ -261,19 +261,19 @@ ReferenceModelVelocity::on_deactivate(const rclcpp_lifecycle::State&) {
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-ReferenceModelVelocity::on_cleanup(const rclcpp_lifecycle::State&) {
+ReferenceModelPosition::on_cleanup(const rclcpp_lifecycle::State&) {
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::
       CallbackReturn::SUCCESS;
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-ReferenceModelVelocity::on_shutdown(const rclcpp_lifecycle::State&) {
+ReferenceModelPosition::on_shutdown(const rclcpp_lifecycle::State&) {
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::
       CallbackReturn::SUCCESS;
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-ReferenceModelVelocity::on_error(const rclcpp_lifecycle::State&) {
+ReferenceModelPosition::on_error(const rclcpp_lifecycle::State&) {
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::
       CallbackReturn::FAILURE;
 }

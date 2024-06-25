@@ -34,27 +34,28 @@ import lifecycle_msgs.msg
 def generate_launch_description():
 
     package_name_ = "reference_model_ros2"
+    config_name_ = "params_pos_model.yaml"
 
     config_dir = os.path.join(get_package_share_directory(package_name_), 'config')
-    param_config_velocity = os.path.join(config_dir, "params_vel_model.yaml")
+    param_config_velocity = os.path.join(config_dir,config_name_)
     with open(param_config_velocity, 'r') as f:
-        params_velocity = yaml.safe_load(f)[package_name_]
+        params = yaml.safe_load(f)[package_name_]
 
 
-    reference_model_velocity = LifecycleNode(
+    reference_model = LifecycleNode(
         package=package_name_,              # must match name in config -> YAML
-        executable='ref_model_velocity',
-        name='reference_model_velocity',    # must match node name in config -> YAML
+        executable='ref_model_position',
+        name='reference_model_position',    # must match node name in config -> YAML
         output='screen',
         namespace='',
-        parameters=[params_velocity]
+        parameters=[params]
     )
 
     # Create the launch configuration variables
     # Make the node take the 'configure' transition
     configure_event = EmitEvent(
         event=ChangeState(
-            lifecycle_node_matcher=matches_action(reference_model_velocity),
+            lifecycle_node_matcher=matches_action(reference_model),
             transition_id=lifecycle_msgs.msg.Transition.TRANSITION_CONFIGURE,
         )
     )
@@ -62,12 +63,12 @@ def generate_launch_description():
     # Make the node take the 'activate' transition
     activate_event = RegisterEventHandler(
         OnStateTransition(
-            target_lifecycle_node=reference_model_velocity, goal_state='inactive',
+            target_lifecycle_node=reference_model, goal_state='inactive',
             entities=[
                 LogInfo(
-                    msg="[LifecycleLaunch] Reference Velocity Model node is activating."),
+                    msg="[LifecycleLaunch] Node is activating."),
                 EmitEvent(event=ChangeState(
-                    lifecycle_node_matcher=matches_action(reference_model_velocity),
+                    lifecycle_node_matcher=matches_action(reference_model),
                     transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVATE,
                 )),
             ],
@@ -75,7 +76,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        reference_model_velocity,
+        reference_model,
         configure_event,
         activate_event
     ]

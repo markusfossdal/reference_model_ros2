@@ -7,7 +7,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic -Wunused-parameter)
 endif()
 
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -38,7 +37,20 @@ target_link_libraries(ref_model_velocity
 
 target_compile_features(ref_model_velocity PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
+# install ref_model_velocity files
 install(TARGETS ref_model_velocity 
   DESTINATION lib/${PROJECT_NAME})
+
+# install launch files
+install(DIRECTORY
+  launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+
+# install configuration files
+install(DIRECTORY
+  config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
 
 ament_package()

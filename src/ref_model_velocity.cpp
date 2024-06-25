@@ -31,6 +31,7 @@ ReferenceModelVelocity::ReferenceModelVelocity(
   declare_parameter<int>("param_qos_buffer", 10);
   get_parameter("param_qos_buffer", param_qos_buffer_);
 
+  //initialization of parameters
   pmap["rt_omega_n_x"] = 0.0;
   pmap["rt_zeta_x"] = 0.0;
   pmap["rt_sat_state_ddot_lower_x"] = 0.0;
@@ -192,8 +193,8 @@ rcl_interfaces::msg::SetParametersResult ReferenceModelVelocity::paramsCallback(
         pair.second = param.as_double();
         result.reason = "Successful!";
         result.successful = true;
+        break;
       } else {
-
         result.successful = false;
         result.reason = "Not succesful!";
       }
@@ -228,7 +229,6 @@ ReferenceModelVelocity::on_configure(const rclcpp_lifecycle::State&) {
 
   params_callback_handle_ = add_on_set_parameters_callback(std::bind(
       &ReferenceModelVelocity::paramsCallback, this, std::placeholders::_1));
-
   RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::
@@ -267,7 +267,7 @@ ReferenceModelVelocity::on_cleanup(const rclcpp_lifecycle::State&) {
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-ReferenceModelVelocity::on_shutdown(const rclcpp_lifecycle::State& state) {
+ReferenceModelVelocity::on_shutdown(const rclcpp_lifecycle::State&) {
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::
       CallbackReturn::SUCCESS;
 }

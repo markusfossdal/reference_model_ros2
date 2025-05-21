@@ -4,7 +4,7 @@ Implements a ros2 version of a 2nd and 3rd order reference model for 6 DOF. The 
 
 ## Clone
 ```
-git clone --recurse-submodules git@gitlab.com:markusfossdal/reference_model_ros2.git
+git clone --recurse-submodules git@github.com:markusfossdal/reference_model_ros2.git
 ```
 
 ## Input and Output

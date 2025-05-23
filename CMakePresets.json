@@ -1,0 +1,39 @@
+
+{
+  "version": 3,
+
+  /* ────────── configure ────────── */
+  "configurePresets": [
+    {
+      "name": "release_gcc",
+      "displayName": "Release GCC",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "/usr/bin/gcc",
+        "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "Python3_EXECUTABLE": "/usr/bin/python3"
+      }
+    },
+    {
+      "name": "release_clang",
+      "displayName": "Release clang",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "/usr/bin/clang",
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "Python3_EXECUTABLE": "/usr/bin/python3"
+      }
+    }
+  ],
+  /* ────────── build ────────── */
+  "buildPresets": [
+    { "name": "rel_gcc", "configurePreset": "release_gcc" },
+    { "name": "rel_clang", "configurePreset": "release_clang" }
+  ]
+
+}
+

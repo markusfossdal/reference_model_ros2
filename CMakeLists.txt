@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(reference_model_ros2)
-# project(reference_model_ros2 VERSION 1.0 LANGUAGES CXX)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+project(reference_model_ros2 VERSION 1.0 LANGUAGES CXX)
 
 add_compile_options(-Wall -Wextra -Wpedantic -Wunused-parameter)
 
@@ -23,8 +20,8 @@ endforeach()
 find_package(reference_model_siso REQUIRED)
 
 # executables
-add_executable(ref_model_velocity bin/main_velocity.cpp src/ref_model_velocity.cpp)
-add_executable(ref_model_position bin/main_position.cpp src/ref_model_position.cpp)
+add_executable(ref_model_velocity src/main_velocity.cpp src/ref_model_velocity.cpp)
+add_executable(ref_model_position src/main_position.cpp src/ref_model_position.cpp)
 
 foreach(target ref_model_velocity ref_model_position)
     target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

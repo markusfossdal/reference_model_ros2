@@ -42,6 +42,7 @@ ros2 launch reference_model_ros2 bringup_position.launch.py
     rclcpp_lifecycle
     std_msgs
     geometry_msgs
+    reference_model_siso
 ```
 
 ## Parameters and Config files

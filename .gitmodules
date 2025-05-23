@@ -1,3 +1,0 @@
-[submodule "lib/reference_model_siso"]
-	path = lib/reference_model_siso
-	url = git@github.com:markusfossdal/reference_model_siso.git

@@ -2,11 +2,6 @@
 
 Implements a ros2 version of a 2nd and 3rd order reference model for 6 DOF. The single input/single output implementation in cpp can be found [here](https://github.com/markusfossdal/reference_model_siso). The ROS2 implementation is based on ROS2 Humble, using the Lifecycle node framework.
 
-## Clone
-```
-git clone --recurse-submodules git@github.com:markusfossdal/reference_model_ros2.git
-```
-
 ## Input and Output
 
 Subscribes to a desired signal with interface:
